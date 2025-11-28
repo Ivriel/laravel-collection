@@ -169,4 +169,133 @@ class CollectionTest extends TestCase
         $this->assertEquals("Ivriel-Gunawan_Gunawan",$collection->join("-","_"));
         $this->assertEquals("Ivriel, Gunawan and Gunawan",$collection->join(", "," and "));
     }
+
+    public function testFilter()
+    {
+        $collection = collect([
+            "Ivriel" => 100,
+            'Budi' => 80,
+            "Gunawan" => 90
+        ]);
+        $result = $collection->filter(function($value,$key){
+            return $value >=90;
+        });
+
+        $this->assertEquals([
+            "Ivriel"=>100,
+            "Gunawan"=> 90,
+        ],$result->all());
+    }
+
+    public function testFilterIndex()
+    {
+        $collection = collect([1,2,3,4,5,6,7,8,9,10]);
+        $result = $collection->filter(function($value,$key){
+            return $value % 2 == 0;
+        });
+
+        $this->assertEqualsCanonicalizing([2,4,6,8,10],$result->all());
+    }
+
+    public function testPartition()
+    {
+        $collection = collect([
+            "Ivriel"=>100,
+            "Budi"=> 80,
+            "Joko"=>90
+        ]);
+
+        [$result1,$result2] = $collection->partition(function($value,$key){
+            return $value >=90;
+        });
+
+        $this->assertEquals([
+            "Ivriel" =>100,
+            "Joko"=> 90,
+        ],$result1->all());
+        $this->assertEquals([
+            "Budi" =>80
+        ],$result2->all());
+    }
+
+    public function testTesting()
+    {
+        $collection= collect(["Ivriel","Gunawan","Gunawan"]);
+        $this->assertTrue($collection->contains("Ivriel"));
+        $this->assertTrue($collection->contains(function($value,$key){
+            return $value == "Gunawan";
+        }));
+    }
+
+    public function testGrouping()
+    {
+        $collection = collect([
+            [
+                "name"=>"Ivriel",
+                "department" =>"IT"
+            ],
+            [
+                "name"=>"Gunawan",
+                "department" =>"IT"
+            ],
+            [
+                "name"=>"Budi",
+                "department" =>"HR"
+            ],
+        ]);
+
+        $result = $collection->groupBy("department");
+
+        $this->assertEquals([
+            "IT"=> collect([
+                 [
+                "name"=>"Ivriel",
+                "department" =>"IT"
+            ],
+            [
+                "name"=>"Gunawan",
+                "department" =>"IT"
+            ]
+            ]),
+            "HR"=> collect([
+                 [
+                "name"=>"Budi",
+                "department" =>"HR"
+            ],
+            ])
+            ],$result->all());
+
+            $result = $collection->groupBy(function($value,$key) {
+                return strtolower($value['department']); 
+            });
+             $this->assertEquals([
+            "it"=> collect([
+                 [
+                "name"=>"Ivriel",
+                "department" =>"IT"
+            ],
+            [
+                "name"=>"Gunawan",
+                "department" =>"IT"
+            ]
+            ]),
+            "hr"=> collect([
+                 [
+                "name"=>"Budi",
+                "department" =>"HR"
+            ],
+            ])
+            ],$result->all());
+    }
+
+    public function testSlicing()
+    {
+        $collection = collect([1,2,3,4,5,6,7,8,9]);
+        $result = $collection->slice(3); // ambil data mulai index 3 sampai akhir
+
+        $this->assertEqualsCanonicalizing([4,5,6,7,8,9],$result->all());
+
+        $result = $collection->slice(3,2); // ambil data mulai index 3 dan ambil cuma 2 data aja
+        $this->assertEqualsCanonicalizing([4,5],$result->all());
+    }
 }
