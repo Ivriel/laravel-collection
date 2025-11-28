@@ -7,6 +7,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
+use function PHPUnit\Framework\assertEquals;
+
 class CollectionTest extends TestCase
 {
     public function testCreateCollection(): void
@@ -400,5 +402,21 @@ class CollectionTest extends TestCase
 
         $result = $collection->sortDesc();
         $this->assertEqualsCanonicalizing([9,8,7,6,5,4,3,2,1],$result->all());
+    }
+
+    public function testAggregate()
+    {
+        $collection = collect([1,2,3,4,5,6,7,8,9]);
+        $result = $collection->sum();
+        $this->assertEquals(45,$result);
+
+        $result=$collection->avg();
+        $this->assertEquals(5,$result);
+
+        $result=$collection->min();
+        $this->assertEquals(1,$result);
+
+        $result=$collection->max();
+        $this->assertEquals(9,$result);
     }
 }
