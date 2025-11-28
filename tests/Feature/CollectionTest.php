@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Data\Person;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -30,5 +31,67 @@ class CollectionTest extends TestCase
 
         $result = $collection->pop();
         $this->assertEquals([1,2],$collection->all());     
+    }
+
+    public function testMap()
+    {
+        $collection  = collect([1,2,3]);
+        $result = $collection->map(function($item) {
+            return $item *2;
+        });
+        $this->assertEqualsCanonicalizing([2,4,6],$result->all());
+    }
+
+    public function testMapInto()
+    {
+        $collection = collect(["Ivriel"]);
+        $result = $collection->mapInto(Person::class);
+        $this->assertEquals([new Person("Ivriel")],$result->all());
+    }
+
+    public function testMapSpread()
+    {
+        $collection = collect([
+            ["Ivriel","Gunawan"],
+            ["Gunawan","Ivriel"]
+        ]);
+
+        $result = $collection->mapSpread(function($firstName,$lastName) {
+            $fullName = $firstName ." ". $lastName;
+            return new Person($fullName);
+        });
+
+        $this->assertEquals([
+            new Person("Ivriel Gunawan"),
+            new Person("Gunawan Ivriel"),
+        ],$result->all());
+    }
+
+    public function testMapToGroups()
+    {
+        $collection = collect([
+            [
+                "name"=>"Ivriel",
+                "department"=>"IT"
+            ],
+            [
+                "name"=>"Gunawan",
+                "department"=>"IT"
+            ],
+            [
+                "name"=>"Budi",
+                "department"=>"HR"
+            ]
+        ]);
+        $result = $collection->mapToGroups(function($person){
+            return [
+                $person["department"] =>$person["name"]
+            ];
+        });
+
+        $this->assertEquals([
+            "IT"=> collect(["Ivriel","Gunawan"]),
+            "HR"=> collect("Budi")
+        ],$result->all());
     }
 }
