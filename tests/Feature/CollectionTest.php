@@ -5,9 +5,11 @@ namespace Tests\Feature;
 use App\Data\Person;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\LazyCollection;
 use Tests\TestCase;
 
 use function PHPUnit\Framework\assertEquals;
+use function PHPUnit\Framework\assertEqualsCanonicalizing;
 
 class CollectionTest extends TestCase
 {
@@ -428,5 +430,19 @@ class CollectionTest extends TestCase
         });
 
         $this->assertEquals(45,$result);
+    }
+
+    public function testLazyCollection()
+    {
+        $collection = LazyCollection::make(function(){
+            $value = 0;
+            while(true) {
+                yield $value;
+                $value++;
+            }
+        });
+
+        $result = $collection->take(10);
+        $this->assertEqualsCanonicalizing([0,1,2,3,4,5,6,7,8,9],$result->all());
     }
 }
