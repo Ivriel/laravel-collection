@@ -130,4 +130,43 @@ class CollectionTest extends TestCase
             "country"=> "Indonesia"
         ],$collection3->all());
     }
+
+    public function testCollapse()
+    {
+        $collection = collect([
+            [1,2,3],
+            [4,5,6],
+            [7,8,9],
+        ]);
+
+        $result = $collection->collapse();
+        $this->assertEqualsCanonicalizing([1,2,3,4,5,6,7,8,9,],$result->all());
+    }
+
+    public function testFlatMap()
+    {
+        $collection = collect([
+            [
+                "name"=>"Ivriel",
+                "hobbies"=>["Coding","Gaming"]
+            ],
+             [
+                "name"=>"Gunawan",
+                "hobbies"=>["Reading","Writing"]
+            ]
+             ]);
+            $result= $collection->flatMap(function($item){
+                $hobbies = $item['hobbies'];
+                return $hobbies;
+            });
+            $this->assertEqualsCanonicalizing(["Coding","Gaming","Reading","Writing"],$result->all());
+    }
+
+    public function testStringRepresentation()
+    {
+        $collection = collect(["Ivriel","Gunawan","Gunawan"]);
+        $this->assertEquals("Ivriel-Gunawan-Gunawan",$collection->join("-"));
+        $this->assertEquals("Ivriel-Gunawan_Gunawan",$collection->join("-","_"));
+        $this->assertEquals("Ivriel, Gunawan and Gunawan",$collection->join(", "," and "));
+    }
 }
