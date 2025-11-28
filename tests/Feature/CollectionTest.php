@@ -298,4 +298,74 @@ class CollectionTest extends TestCase
         $result = $collection->slice(3,2); // ambil data mulai index 3 dan ambil cuma 2 data aja
         $this->assertEqualsCanonicalizing([4,5],$result->all());
     }
+
+    public function testTake()
+    {
+        $collection = collect([1,2,3,1,2,3,1,2,3]);
+        $result = $collection->take(3);
+        $this->assertEqualsCanonicalizing([1,2,3],$result->all());
+
+        $result = $collection->takeUntil(function($value,$key){
+            return $value == 3; // kondisi true tidak akan diambil
+        });
+        $this->assertEqualsCanonicalizing([1,2],$result->all());
+
+          $result = $collection->takeWhile(function($value,$key){
+            return $value < 3; // kondisi false tidak akan diambil
+        });
+        $this->assertEqualsCanonicalizing([1,2],$result->all());
+    }
+
+    public function testSkip()
+    {
+        $collection = collect([1,2,3,4,5,6,7,8,9]);
+        $result = $collection->skip(3);
+        $this->assertEqualsCanonicalizing([4,5,6,7,8,9],$result->all());
+
+        $result = $collection->skipUntil(function($value,$key){
+            return $value == 3; // skip sampai valuenya sama dengan 3. jadi yang diambil dari 3 dan seterusnya
+        });
+        $this->assertEqualsCanonicalizing([3,4,5,6,7,8,9],$result->all());
+
+        $result = $collection->skipWhile(function($value,$key){
+            return $value < 3; // skip sampai valuenya false. jadi yang diambil dari 3 dan seterusnya
+        });
+        $this->assertEqualsCanonicalizing([3,4,5,6,7,8,9],$result->all());
+    }
+
+    public function testChunked()
+    {
+        $collection = collect([1,2,3,4,5,6,7,8,9,10]);
+        $result = $collection->chunk(3);
+
+        $this->assertEqualsCanonicalizing([1,2,3],$result->all()[0]->all());
+        $this->assertEqualsCanonicalizing([4,5,6],$result->all()[1]->all());
+        $this->assertEqualsCanonicalizing([7,8,9],$result->all()[2]->all());
+        $this->assertEqualsCanonicalizing([10],$result->all()[3]->all());
+    }
+    
+    public function testFirst()
+    {
+        $collection = collect([1,2,3,4,5,6,7,8,9]);
+        $result = $collection->first();
+        $this->assertEquals(1,$result);
+
+        $result = $collection->first(function($value,$key){
+            return $value > 5;
+        });
+        $this->assertEquals(6,$result);
+    }
+
+    public function testLast()
+    {
+        
+        $collection = collect([1,2,3,4,5,6,7,8,9]);
+        $result = $collection->last();
+        $this->assertEquals(9,$result);
+
+        $result = $collection->last(function($value,$key){
+            return $value < 5;
+        });
+        $this->assertEquals(4,$result);
+    }
 }
